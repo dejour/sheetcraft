@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="SheetCraft">
+  <rect width="64" height="64" rx="16" fill="#16766f"/>
+  <path d="M20 12h20l8 8v32H20z" fill="#fafbf8"/>
+  <path d="M40 12v8h8" fill="#dce3e1"/>
+  <path d="M25 27h18M25 33h18M25 39h18" stroke="#cbd6d3" stroke-width="2" stroke-linecap="round"/>
+  <path d="M38 23v20" stroke="#105d58" stroke-width="4" stroke-linecap="round"/>
+  <ellipse cx="32" cy="44" rx="8" ry="5.5" transform="rotate(-18 32 44)" fill="#105d58"/>
+</svg>

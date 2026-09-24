@@ -1,0 +1,163 @@
+/* Editor layout and dimensions from the approved Paper editor artboards. */
+.editor-shell {
+  --paper: #f4f6f4; --surface: #fff; --ink: #17201e; --muted: #65716b; --line: #dde4df;
+  --teal: #245b48; --teal-dark: #245b48; --teal-soft: #edf3ef; --teal-soft-strong: #edf3ef;
+  display: grid; grid-template-columns: 208px minmax(0, 1fr) 360px; grid-template-rows: 64px minmax(0, 1fr);
+  height: 100dvh; min-height: 600px; padding: 0; gap: 0; overflow: hidden; align-items: stretch;
+  background: #fff; color: var(--ink); font: 14px/20px system-ui, sans-serif; -webkit-font-smoothing: antialiased;
+}
+.editor-shell button, .editor-shell summary, .editor-shell a { -webkit-tap-highlight-color: transparent; }
+.editor-shell button:disabled { cursor: not-allowed; }
+.editor-shell a { color: inherit; text-decoration: none; }
+.editor-shell :is(button, a, summary):focus-visible { outline: 2px solid #245b48; outline-offset: 3px; }
+.editor-header { grid-column: 1 / -1; display: flex; align-items: center; gap: 24px; padding: 0 24px; border-bottom: 1px solid var(--line); min-width: 0; }
+.editor-logo { display: flex; align-items: center; gap: 10px; width: 184px; flex-shrink: 0; font-size: 19px; font-weight: 600; letter-spacing: -.04em; }
+.editor-logo > span { color: var(--teal); font-size: 28px; }
+.editor-project-title { min-width: 0; }
+.editor-project-title .title-input { width: 210px; height: 36px; padding: 6px 0; border-color: transparent; background: transparent; font: 14px/20px system-ui; box-shadow: none; }
+.editor-project-title .title-input:focus { border-color: var(--line); padding-inline: 8px; }
+.editor-save-status { font-size: 12px; color: var(--muted); margin-right: auto; white-space: nowrap; }
+.editor-export-formats { font-size: 13px; color: var(--muted); white-space: nowrap; }
+.editor-account { position: relative; flex-shrink: 0; }
+.editor-account > summary { cursor: pointer; list-style: none; display: grid; place-items: center; border-radius: 50%; width: 32px; height: 32px; background: var(--teal-soft); color: var(--teal); font-size: 13px; }
+.editor-account .account-panel { position: absolute; top: 44px; right: 0; z-index: 30; width: 250px; background: #fff; border: 1px solid var(--line); padding: 16px; }
+.editor-library { min-height: 0; display: flex; flex-direction: column; gap: 24px; border-right: 1px solid var(--line); padding: 24px 16px; }
+.editor-library-label { font-size: 13px; color: var(--muted); }
+.editor-library-actions { display: grid; gap: 10px; }
+.editor-library-actions > button { height: 40px; background: var(--teal); color: #fff; border-radius: 6px; box-shadow: none; }
+.editor-library .upload-button { height: 40px; justify-content: center; padding: 0 8px; border: 1px solid var(--line); border-radius: 6px; background: #fff; color: var(--ink); font-size: 13px; }
+.editor-projects { display: grid; align-content: start; gap: 10px; overflow-y: auto; min-height: 0; }
+.editor-project-row { display: flex; align-items: center; padding: 8px; border-radius: 6px; }
+.editor-project-row.active { background: var(--teal-soft); color: var(--teal); }
+.editor-project-open { border: 0; background: none; color: inherit; display: flex; align-items: center; gap: 8px; padding: 4px 0; flex: 1; min-width: 0; text-align: left; cursor: pointer; }
+.editor-project-open > span:first-child { width: 22px; flex-shrink: 0; font-size: 20px; }
+.editor-project-open > span:last-child { min-width: 0; display: grid; gap: 5px; }
+.editor-project-open strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; font-weight: 500; }
+.editor-project-open small { color: var(--muted); font-size: 12px; }
+.editor-library-empty { font-size: 13px; color: var(--muted); }
+.editor-library-footer { margin-top: auto; border-top: 1px solid var(--line); padding: 20px 8px 0; display: grid; gap: 16px; font-size: 13px; color: var(--muted); }
+.editor-library-footer summary { list-style: none; cursor: pointer; }
+.editor-library-footer p { font-size: 12px; line-height: 22px; }
+.editor-shell .score-pane { padding: 0; display: flex; flex-direction: column; min-width: 0; min-height: 0; overflow: hidden; background: var(--paper); }
+.editor-score-toolbar { height: 56px; flex-shrink: 0; display: flex; align-items: center; gap: 16px; padding: 0 28px; border-bottom: 1px solid var(--line); background: #fff; font-size: 13px; color: var(--muted); }
+.editor-select-label { background: var(--teal-soft); color: var(--teal); border-radius: 5px; padding: 8px 12px; }
+.editor-select-hint { font-size: 12px; }
+.editor-zoom { margin-left: auto; display: flex; align-items: center; }
+.editor-zoom button { border: 0; background: none; padding: 8px; color: inherit; cursor: pointer; }
+.editor-score-scroll { flex: 1; min-height: 0; overflow: auto; padding: 24px 32px; }
+.editor-shell .score-paper { width: 100%; min-height: 660px; margin: 0; padding: 32px 40px; border: 1px solid var(--line); border-radius: 3px; background: #fff; box-shadow: none; overflow: visible; }
+.editor-score-title { text-align: center; margin-bottom: 20px; }
+.editor-score-title h1 { font: 400 32px/38px "Instrument Serif", serif; margin: 0 0 8px; }
+.editor-score-title span { color: var(--muted); font-size: 12px; }
+.editor-shell .score-render { min-height: 0; }
+.editor-shell .score-canvas { min-height: 0; }
+.editor-transport { height: 72px; flex-shrink: 0; border-top: 1px solid var(--line); background: #fff; display: flex; align-items: center; gap: 12px; padding: 0 28px; position: relative; }
+.editor-transport > button { font-size: 13px; padding: 8px 10px; border-radius: 5px; }
+.editor-transport > button:nth-of-type(2) { order: -3; background: var(--teal); color: white; border-radius: 24px; min-width: 48px; height: 40px; }
+.editor-transport > button:nth-of-type(3) { order: -2; }
+.editor-transport > button:nth-of-type(1) { order: -1; }
+.editor-transport .playback-loop-active { background: var(--teal-soft); color: var(--teal); }
+.editor-transport .tempo-control { margin-left: auto; display: flex; min-width: 0; }
+.editor-transport .tempo-control > span, .editor-transport .tempo-control > input { display: none; }
+.editor-transport .tempo-control label { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+.editor-transport .tempo-control input { width: 64px; height: 36px; border-color: var(--line); background: #fff; }
+.editor-measures { font-size: 12px; }
+.editor-measures summary { cursor: pointer; list-style: none; color: var(--muted); }
+.editor-measures .measure-strip { position: absolute; bottom: 64px; right: 16px; max-width: 90%; padding: 12px; background: white; border: 1px solid var(--line); border-radius: 6px; z-index: 8; }
+.editor-shell .agent-panel { position: static; height: 100%; max-height: 100%; padding: 0; gap: 0; min-width: 0; min-height: 0; display: flex; flex-direction: column; border-left: 1px solid var(--line); background: white; overflow: hidden; }
+.editor-panel-tabs { display: flex; justify-content: space-between; padding: 0 24px; min-height: 56px; border-bottom: 1px solid var(--line); }
+.editor-panel-tabs button { border: 0; background: none; font: 14px/20px system-ui; color: var(--muted); cursor: pointer; }
+.editor-panel-tabs button[aria-selected="true"] { color: var(--teal); font-weight: 600; }
+.editor-composer-panel { display: flex; flex-direction: column; min-height: 0; flex: 1; }
+.editor-shell .inspector-heading { padding: 14px 24px; margin: 0; }
+.editor-shell .inspector-heading-copy span { font-size: 12px; font-weight: 400; color: var(--muted); letter-spacing: 0; }
+.editor-shell .inspector-heading button { color: var(--muted); font-size: 12px; }
+.editor-shell .chat-thread { flex: 1; min-height: 0; padding: 0 24px 24px; gap: 24px; overflow: auto; background: white; }
+.editor-shell .chat-message { max-width: 100%; padding: 0; border: 0; border-radius: 0; background: none; font-size: 14px; line-height: 24px; box-shadow: none; }
+.editor-shell .chat-message > span { font-family: system-ui, sans-serif; display: block; margin-bottom: 10px; font-size: 13px; color: var(--teal); }
+.editor-shell .chat-message.user > span { font-size: 12px; color: var(--muted); }
+.editor-shell .chat-message.user > :last-child { padding: 16px; background: var(--paper); border-radius: 8px; }
+.editor-shell .chat-context-selection { margin: 0 20px 12px; padding: 10px 12px; background: var(--teal-soft); border: 0; color: var(--teal); border-radius: 5px; font-size: 12px; }
+.editor-shell .composer-box { margin: 0 20px 20px; padding: 14px; border: 1px solid var(--teal); border-radius: 8px; background: white; box-shadow: none; }
+.editor-shell .composer-box textarea { padding: 0; min-height: 66px; border: none; background: white; box-shadow: none; font: 14px/23px system-ui; resize: vertical; }
+.editor-shell .composer-actions { margin-top: 10px; }
+.editor-shell .composer-actions span { font-size: 11px; color: var(--muted); }
+.editor-shell .composer-actions button { height: 37px; background: var(--teal); color: white; border-radius: 5px; font-size: 13px; padding: 8px 16px; }
+.editor-note-panel { min-height: 0; flex: 1; overflow-y: auto; }
+.docked-inspector { display: flex; flex-direction: column; min-height: 100%; }
+.docked-note-heading { padding: 24px; border-bottom: 1px solid var(--line); }
+.docked-note-heading > div { display: flex; align-items: center; justify-content: space-between; }
+.docked-note-heading h2 { font: 400 36px/42px "Instrument Serif", serif; margin: 0; }
+.docked-note-heading span { padding: 6px 10px; border-radius: 4px; font-size: 12px; color: var(--teal); background: var(--teal-soft); }
+.docked-note-heading p { font-size: 13px; color: var(--muted); margin: 12px 0 0; }
+.docked-note-fields { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px 16px; padding: 20px 24px 0; }
+.docked-note-fields label { font-size: 13px; color: var(--muted); font-weight: 400; }
+.docked-note-fields button { height: 40px; background: #fff; border-color: var(--line); border-radius: 5px; font-size: 14px; }
+.docked-chord-action { padding: 24px; }
+.docked-chord-action button { width: 100%; height: 40px; color: var(--teal); border-color: var(--teal); }
+.docked-chord-action p, .docked-notation p, .docked-note-footer p { font-size: 12px; line-height: 20px; color: var(--muted); margin: 12px 0 0; }
+.docked-notation { border-top: 1px solid var(--line); padding: 20px 24px; }
+.docked-notation summary { cursor: pointer; }
+.docked-notation .docked-note-fields { padding-inline: 0; }
+.docked-note-footer { margin-top: auto; padding: 24px; border-top: 1px solid var(--line); }
+.docked-note-footer p { margin: 0 0 16px; }
+.docked-note-footer button { width: 100%; border: 1px solid #e5d1cd; color: #934b3e; height: 40px; }
+.docked-chord-tones { padding: 12px 24px 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.editor-note-empty { padding: 32px 24px; color: var(--muted); }
+.editor-note-empty h2 { font: 400 32px/38px "Instrument Serif", serif; color: var(--ink); }
+.editor-note-empty button { border: 1px solid var(--line); padding: 10px; background: white; border-radius: 5px; color: var(--teal); }
+@media (max-width: 1180px) {
+  .editor-shell { grid-template-columns: 176px minmax(0, 1fr) 320px; }
+  .editor-header { gap: 16px; }
+  .editor-logo { width: 144px; }
+  .editor-export-formats, .editor-select-hint { display: none; }
+  .editor-score-scroll { padding: 20px; }
+  .editor-shell .score-paper { padding: 24px; }
+  .editor-transport { padding-inline: 12px; gap: 4px; }
+  .editor-measures { display: none; }
+}
+@media (max-width: 800px) {
+  .editor-shell { grid-template-columns: minmax(0, 1fr); grid-template-rows: 64px auto minmax(480px, 65vh) minmax(480px, auto); height: auto; overflow: visible; }
+  .editor-header { padding-inline: 16px; gap: 10px; flex-wrap: wrap; }
+  .editor-logo { width: auto; font-size: 16px; }
+  .editor-project-title { flex: 1; }
+  .editor-project-title .title-input { width: 100%; }
+  .editor-save-status, .editor-account { display: none; }
+  .editor-export-trigger { padding: 8px; }
+  .editor-library { padding: 16px; gap: 12px; }
+  .editor-library-actions { grid-template-columns: 1fr 1fr; }
+  .editor-projects { display: flex; overflow-x: auto; }
+  .editor-project-row { min-width: 160px; }
+  .editor-library-footer { display: none; }
+  .editor-shell .agent-panel { position: static; height: 100%; max-height: 100%; border-left: 0; border-top: 1px solid var(--line); }
+  .editor-composer-panel { min-height: 450px; }
+  .editor-shell .chat-thread { max-height: 350px; }
+  .editor-score-toolbar { padding-inline: 16px; }
+  .editor-shell .score-paper { min-width: 540px; }
+  .editor-note-panel { overflow: visible; }
+}
+
+.editor-shell .inspector-heading { min-height: 56px; border: 0; padding-block: 10px; }
+.editor-shell .inspector-heading button { border-color: transparent; }
+.editor-shell .chat-message > span { text-transform: none; letter-spacing: 0; }
+.editor-transport > button { border-color: transparent; }
+.editor-transport > button:nth-of-type(2) { min-width: 40px; width: 40px; padding: 0; }
+.editor-project-title h1 { font: 14px/20px system-ui; margin: 0; }
+
+/* Menus render outside the scrolling score list so their edges never clip. */
+.editor-menu-trigger { display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; background: white; color: #245b48; }
+.editor-export-trigger { border: 1px solid #245b48; border-radius: 6px; padding: 9px 16px; font: 500 13px/20px system-ui; }
+.editor-project-trigger { flex-shrink: 0; width: 28px; height: 32px; padding: 0; border: 0; border-radius: 5px; background: transparent; color: #65716b; }
+.editor-menu-trigger:hover, .editor-menu-trigger[aria-expanded="true"] { background: #edf3ef; color: #245b48; }
+.editor-menu-popover { position: fixed; z-index: 100; width: 284px; max-width: calc(100vw - 24px); padding: 6px; border: 1px solid #dde4df; border-radius: 10px; background: #fff; color: #17201e; box-shadow: 0 12px 36px #17201e14, 0 2px 6px #17201e08; font: 14px/20px system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+.editor-menu-heading { padding: 10px 10px 8px; color: #65716b; font-size: 11px; font-weight: 500; letter-spacing: .05em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.editor-menu-popover > button { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 62px; padding: 10px; border: 0; border-radius: 6px; background: transparent; color: #17201e; cursor: pointer; text-align: left; transform: none; box-shadow: none; }
+.editor-menu-popover > button > svg { width: 18px; height: 18px; flex-shrink: 0; color: #245b48; }
+.editor-menu-popover > button > span { display: grid; gap: 3px; flex: 1; }
+.editor-menu-popover strong { font-size: 13px; line-height: 18px; font-weight: 500; }
+.editor-menu-popover small { color: #65716b; font-size: 11px; line-height: 16px; font-weight: 400; }
+.editor-menu-popover em { color: #65716b; font-size: 11px; font-style: normal; font-weight: 400; }
+.editor-menu-popover > button:hover, .editor-menu-popover > button:focus-visible { background: #edf3ef; outline: none; transform: none; }
+.editor-menu-popover > button:disabled { opacity: .45; cursor: not-allowed; }
+.editor-menu-popover > .editor-menu-danger, .editor-menu-popover > .editor-menu-danger svg { color: #934b3e; }
+.editor-menu-popover > .editor-menu-danger:hover, .editor-menu-popover > .editor-menu-danger:focus-visible { background: #fff1ee; }

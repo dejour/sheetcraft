@@ -1,0 +1,52 @@
+{
+  "name": "ai-native-sheet-music-mvp",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:worker": "wrangler dev src/worker/index.ts --local --port 8788",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "deploy": "wrangler deploy",
+    "db:migrate": "wrangler d1 migrations apply sheet_music_db --local",
+    "test": "node scripts/test.mjs"
+  },
+  "dependencies": {
+    "@langchain/core": "^1.2.3",
+    "@langchain/openai": "^1.5.5",
+    "@radix-ui/react-label": "^2.1.11",
+    "@radix-ui/react-select": "^2.3.2",
+    "@radix-ui/react-slot": "^1.3.0",
+    "@tailwindcss/vite": "^4.3.2",
+    "better-auth": "^1.6.23",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "fast-xml-parser": "^4.5.0",
+    "hono": "^4.6.14",
+    "jspdf": "^4.2.1",
+    "lucide-react": "^1.23.0",
+    "opensheetmusicdisplay": "^1.9.2",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-markdown": "^10.1.0",
+    "react-router": "^8.2.0",
+    "shadcn": "^4.13.0",
+    "svg2pdf.js": "^2.7.0",
+    "tailwind-merge": "^3.6.0",
+    "tailwindcss": "^4.3.2",
+    "tone": "^15.0.4",
+    "tw-animate-css": "^1.4.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241230.0",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^4.3.4",
+    "esbuild": "^0.25.12",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.7",
+    "wrangler": "^3.99.0"
+  }
+}
