@@ -15,6 +15,8 @@ cp .dev.vars.example .dev.vars
 
 Set `LLM_API_KEY` in `.dev.vars` if you want model-based generation. Generate a random `BETTER_AUTH_SECRET` with `openssl rand -base64 32`. The `.dev.vars` file is ignored by Git.
 
+Paid AI requests are limited by default to 30 per user and 300 total per UTC day. Set `AI_DAILY_USER_LIMIT` and `AI_DAILY_GLOBAL_LIMIT` in `wrangler.toml` for your deployment. The limits use D1, so apply the migrations before enabling an API key.
+
 In two terminals:
 
 ```bash
@@ -47,6 +49,7 @@ npm run build
 ```
 
 The tests cover score parsing and editing, save conflicts, streaming, and MIDI export. This is a MusicXML subset; timewise scores, grace notes, and mid-measure attribute changes are not supported.
+GitHub Actions runs these checks and a dependency audit on each push and pull request.
 
 ## License
 

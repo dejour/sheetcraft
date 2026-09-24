@@ -1,6 +1,9 @@
 LLM_API_KEY=replace-with-your-api-key
 LLM_MODEL=deepseek-flash
 BETTER_AUTH_SECRET=replace-with-openssl-rand-base64-32
+# Optional daily caps for paid AI requests (defaults: 30 per user, 300 total).
+# AI_DAILY_USER_LIMIT=30
+# AI_DAILY_GLOBAL_LIMIT=300
 # Optional. Defaults to https://api.deepseek.com
 # LLM_BASE_URL=https://api.deepseek.com
 

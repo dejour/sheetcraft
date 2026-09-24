@@ -5,6 +5,8 @@ compatibility_flags = ["nodejs_compat"]
 
 [vars]
 LLM_MODEL = "deepseek-flash"
+AI_DAILY_USER_LIMIT = 30
+AI_DAILY_GLOBAL_LIMIT = 300
 
 [assets]
 directory = "./dist"

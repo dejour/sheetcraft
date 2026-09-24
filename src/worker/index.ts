@@ -1,5 +1,4 @@
 import { Hono } from "hono";
-import { cors } from "hono/cors";
 import { HTTPException } from "hono/http-exception";
 import { betterAuth } from "better-auth";
 import { applyOperations, exportMusicXML, introducedBlockingValidationReason, parseMusicXML, validateScore } from "../shared";
@@ -18,6 +17,8 @@ type Bindings = {
   DEEPSEEK_BASE_URL?: string;
   BETTER_AUTH_SECRET?: string;
   BETTER_AUTH_URL?: string;
+  AI_DAILY_USER_LIMIT?: string | number;
+  AI_DAILY_GLOBAL_LIMIT?: string | number;
 };
 
 type ProjectRecord = {
@@ -55,15 +56,6 @@ app.get("/", async (c) => {
   return c.env.ASSETS.fetch(c.req.raw);
 });
 
-app.use(
-  "/api/*",
-  cors({
-    origin: (origin) => origin,
-    allowHeaders: ["Content-Type", "Authorization"],
-    allowMethods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
-    credentials: true
-  })
-);
 app.on(["GET", "POST"], "/api/auth/*", async (c) => {
   if (!c.env.DB) return c.json({ error: "Authentication requires D1." }, 503);
   return createAuth(c.env, c.req.raw).handler(c.req.raw);
@@ -99,7 +91,6 @@ app.get("/api/bootstrap", async (c) => {
           send({ type: "session", user: session?.user ?? null });
           if (!session) return;
 
-          await claimEasyOneMeProject(c.env, session.user.id);
           const projects = await listProjects(c.env, session.user.id);
           send({ type: "projects", projects });
 
@@ -123,16 +114,18 @@ app.get("/api/bootstrap", async (c) => {
 });
 
 app.post("/api/agent/classify-intent", async (c) => {
-  await requireSession(c);
-  const body = await safeJson<{ message?: string; context?: { scoreTitle?: string; measureCount?: number } }>(c.req.raw);
+  const session = await requireSession(c);
+  const body = await readLimitedJson<{ message?: string; context?: { scoreTitle?: string; measureCount?: number } }>(c.req.raw);
+  if (hasLlmPlanner(c.env)) await consumeAiQuota(c.env, session.user.id);
   const intent = await classifyComposerIntent(c.env, body?.message ?? "", body?.context);
   return c.json({ intent });
 });
 
 app.post("/api/projects/stream-generate", async (c) => {
   const session = await requireSession(c);
-  const body = await safeJson<{ prompt?: string; context?: PlannerContext; history?: PlannerHistoryMessage[] }>(c.req.raw);
+  const body = await readLimitedJson<{ prompt?: string; context?: PlannerContext; history?: PlannerHistoryMessage[] }>(c.req.raw);
   const prompt = body?.prompt?.trim() || "Create a short beginner piano phrase";
+  if (hasLlmPlanner(c.env)) await consumeAiQuota(c.env, session.user.id);
   const title = titleFromPrompt(prompt);
   const encoder = new TextEncoder();
 
@@ -283,7 +276,7 @@ app.get("/api/projects/:projectId", async (c) => {
 
 app.patch("/api/projects/:projectId", async (c) => {
   const session = await requireSession(c);
-  const body = (await c.req.json()) as { title?: string };
+  const body = await readLimitedJson<{ title?: string }>(c.req.raw, 8 * 1024) ?? {};
   const title = body.title?.trim();
   if (!title) return c.json({ error: "Title is required" }, 400);
 
@@ -305,8 +298,9 @@ app.delete("/api/projects/:projectId", async (c) => {
 
 app.post("/api/projects/:projectId/agent/edit", async (c) => {
   const session = await requireSession(c);
-  const body = (await c.req.json()) as { message?: string; selection?: Selection; context?: PlannerContext; history?: PlannerHistoryMessage[] };
+  const body = await readLimitedJson<{ message?: string; selection?: Selection; context?: PlannerContext; history?: PlannerHistoryMessage[] }>(c.req.raw) ?? {};
   const project = await requireOwnedProjectOrThrow(c.env, c.req.param("projectId"), session.user.id);
+  if (hasLlmPlanner(c.env)) await consumeAiQuota(c.env, session.user.id);
   const score = parseMusicXML(await getProjectMusicXml(c.env, project));
   const editIntent = editIntentFromMessage(score, body.message ?? "");
   const plan = await planScoreEditWithModel(
@@ -339,8 +333,9 @@ app.post("/api/projects/:projectId/agent/edit", async (c) => {
 
 app.post("/api/projects/:projectId/agent/stream-edit", async (c) => {
   const session = await requireSession(c);
-  const body = await safeJson<{ message?: string; selection?: Selection; context?: PlannerContext; history?: PlannerHistoryMessage[] }>(c.req.raw);
+  const body = await readLimitedJson<{ message?: string; selection?: Selection; context?: PlannerContext; history?: PlannerHistoryMessage[] }>(c.req.raw);
   const project = await requireOwnedProjectOrThrow(c.env, c.req.param("projectId"), session.user.id);
+  if (hasLlmPlanner(c.env)) await consumeAiQuota(c.env, session.user.id);
   const currentMusicxml = await getProjectMusicXml(c.env, project);
   const score = parseMusicXML(currentMusicxml);
   const encoder = new TextEncoder();
@@ -489,7 +484,7 @@ app.post("/api/projects/:projectId/agent/stream-edit", async (c) => {
 
 app.post("/api/projects/:projectId/operations", async (c) => {
   const session = await requireSession(c);
-  const body = (await c.req.json()) as { operations?: ScoreOperation[]; musicxml?: string; expectedR2Key?: string };
+  const body = await readLimitedJson<{ operations?: ScoreOperation[]; musicxml?: string; expectedR2Key?: string }>(c.req.raw, MAX_SCORE_BODY_BYTES) ?? {};
   const project = await requireOwnedProjectOrThrow(c.env, c.req.param("projectId"), session.user.id);
   const score = parseMusicXML(await getProjectMusicXml(c.env, project));
   let result: Awaited<ReturnType<typeof updateProjectFromOperations>>;
@@ -1262,26 +1257,64 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function readMusicXmlUpload(request: Request): Promise<{ musicxml: string; title?: string }> {
+const MAX_SCORE_BODY_BYTES = 4 * 1024 * 1024;
+
+export async function readMusicXmlUpload(request: Request): Promise<{ musicxml: string; title?: string }> {
   const contentType = request.headers.get("content-type") ?? "";
+  const bytes = await readLimitedBody(request, MAX_SCORE_BODY_BYTES);
   if (contentType.includes("multipart/form-data")) {
-    const form = await request.formData();
+    const form = await new Response(bytes.buffer as ArrayBuffer, { headers: { "content-type": contentType } }).formData();
     const file = form.get("file");
     const title = stringOrUndefined(form.get("title"));
     if (!(file instanceof File)) throw new Error("Expected a MusicXML file field named file.");
     return { musicxml: await file.text(), title };
   }
-  const body = (await request.json()) as { musicxml?: string; title?: string };
+  let body: { musicxml?: string; title?: string };
+  try {
+    body = JSON.parse(new TextDecoder().decode(bytes));
+  } catch {
+    throw new HTTPException(400, { message: "Invalid JSON request." });
+  }
   if (!body.musicxml) throw new Error("Expected musicxml.");
   return { musicxml: body.musicxml, title: body.title };
 }
 
-async function safeJson<T>(request: Request): Promise<T | undefined> {
+const MAX_AI_BODY_BYTES = 64 * 1024;
+
+export async function readLimitedJson<T>(request: Request, maxBytes = MAX_AI_BODY_BYTES): Promise<T | undefined> {
+  const bytes = await readLimitedBody(request, maxBytes);
+  if (bytes.byteLength === 0) return undefined;
   try {
-    return (await request.json()) as T;
+    return JSON.parse(new TextDecoder().decode(bytes)) as T;
   } catch {
-    return undefined;
+    throw new HTTPException(400, { message: "Invalid JSON request." });
   }
+}
+
+async function readLimitedBody(request: Request, maxBytes: number): Promise<Uint8Array> {
+  const contentLength = Number(request.headers.get("content-length"));
+  if (contentLength > maxBytes) throw new HTTPException(413, { message: "The request is too large." });
+  const reader = request.body?.getReader();
+  if (!reader) return new Uint8Array();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    size += value.byteLength;
+    if (size > maxBytes) {
+      await reader.cancel();
+      throw new HTTPException(413, { message: "The request is too large." });
+    }
+    chunks.push(value);
+  }
+  const bytes = new Uint8Array(size);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return bytes;
 }
 
 function createAuth(env: Bindings, request?: Request) {
@@ -1350,6 +1383,29 @@ async function requireSession(c: { env: Bindings; req: { raw: Request } }): Prom
   const session = await currentSession(c);
   if (!session) throw new HTTPException(401, { message: "Sign in required." });
   return session;
+}
+
+export async function consumeAiQuota(env: Bindings, userId: string, day = new Date().toISOString().slice(0, 10)) {
+  if (!env.DB) throw new HTTPException(503, { message: "AI usage limits require D1." });
+  const limits = [
+    { subject: `user:${userId}`, limit: positiveLimit(env.AI_DAILY_USER_LIMIT, 30) },
+    { subject: "global", limit: positiveLimit(env.AI_DAILY_GLOBAL_LIMIT, 300) }
+  ];
+  for (const { subject, limit } of limits) {
+    const result = await env.DB.prepare(
+      `insert into ai_daily_usage (day, subject, request_count) values (?, ?, 1)
+       on conflict(day, subject) do update set request_count = request_count + 1
+       where request_count < ?`
+    ).bind(day, subject, limit).run();
+    if (result.meta.changes !== 1) {
+      throw new HTTPException(429, { message: "Today's AI request limit has been reached." });
+    }
+  }
+}
+
+function positiveLimit(value: string | number | undefined, fallback: number): number {
+  const parsed = Number(value);
+  return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : fallback;
 }
 
 function stringOrUndefined(value: FormDataEntryValue | null): string | undefined {
@@ -1446,23 +1502,6 @@ async function listProjects(env: Bindings, userId: string): Promise<ProjectRecor
   return [...memory.projects.values()]
     .filter((project) => project.r2_key && project.user_id === userId)
     .sort((a, b) => b.updated_at.localeCompare(a.updated_at));
-}
-
-async function claimEasyOneMeProject(env: Bindings, userId: string) {
-  if (env.DB) {
-    const rows = await env.DB.prepare("select id from projects where user_id is null and title = ?")
-      .bind("Easy One Me")
-      .all<{ id: string }>();
-    if (rows.results.length !== 1) return;
-    await env.DB.prepare("update projects set user_id = ?, updated_at = ? where id = ?")
-      .bind(userId, new Date().toISOString(), rows.results[0].id)
-      .run();
-    return;
-  }
-  const matches = [...memory.projects.values()].filter((project) => project.user_id === null && project.title === "Easy One Me");
-  if (matches.length !== 1) return;
-  const project = matches[0];
-  memory.projects.set(project.id, { ...project, user_id: userId, updated_at: new Date().toISOString() });
 }
 
 async function requireProject(env: Bindings, id: string): Promise<ProjectRecord> {

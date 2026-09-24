@@ -1,6 +1,7 @@
 import test from "node:test";
 import "./midi.test";
 import "./generationStream.test";
+import "./security.test";
 import assert from "node:assert/strict";
 import { applyOperations, exportMusicXML, parseMusicXML, validateScore } from "../src/shared";
 import { ScoreSaveQueue, type SavedScore } from "../src/frontend/scoreSaveQueue";
