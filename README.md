@@ -2,7 +2,7 @@
 
 SheetCraft is an open-source sheet music editor. It can generate a score from a text prompt, edit notes with a conversational composer, render MusicXML, play the score, and export MusicXML, MIDI, or PDF.
 
-![SheetCraft editor with a demo score](docs/editor.jpg)
+![SheetCraft editor showing the Easy On Me score](docs/editor.jpg)
 
 The app uses React, TypeScript, Vite, Hono, and Cloudflare Workers. It stores account and project metadata in D1 and scores in R2. AI generation uses the DeepSeek API by default; without an API key, local development uses a limited fallback planner.
 
